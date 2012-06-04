@@ -1,0 +1,15 @@
+=====================================================================
+= ICMI MAX7219 Arduino Library                                      =
+=====================================================================
+* Author          : Hendrik Busch
+* Current version : 0.1-SNAPSHOT
+* License         : Creative Commons Attribution-NonCommercial-
+                    ShareAlike 3.0 Germany License.
+
+
+Abstract
+--------
+This piece of software is my personal take on an Arduino library
+for controlling the Maxim MAX7219 LED controller IC.
+
+
