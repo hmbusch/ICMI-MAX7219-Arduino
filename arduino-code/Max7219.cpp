@@ -1,110 +1,111 @@
 #include "Arduino.h"
 #include "Max7219.h"
 
-// -------------------------------------------------------------------
-// Register addresses
-// -------------------------------------------------------------------
-#define REG_NO_OP 0x00
-#define REG_DIG_0 0x01
-#define REG_DIG_1 0x02
-#define REG_DIG_2 0x03
-#define REG_DIG_3 0x04
-#define REG_DIG_4 0x05
-#define REG_DIG_5 0x06
-#define REG_DIG_6 0x07
-#define REG_DIG_7 0x08
-#define REG_DECODE_MODE 0x09
-#define REG_INTENSITY 0x0A
-#define REG_SCAN_LIMIT 0x0B
-#define REG_SHUTDOWN 0x0C
-#define REG_DISPLAY_TEST 0x0F
+/**
+ * Creates a new controller instance. You need to pass the pin configuration
+ * to the constructor (data in, clock, load) and specify how many digits/rows
+ * you have connected to the MAX7219. This number is used to set the scan limit
+ * of the IC. If you connect less than 8 digits, it makes sense not to scan
+ * through all 8 possible digits for better brightness. In addition, this
+ * number is used to validate the digit number when calling any digit manipulation
+ * method.
+ * The constructor does not enable the chip, so it will not display anything
+ * until enable(true) is called.
+ *
+ * @param dataPin the number of the Arduino pin that is connected to the data in pin
+ *                of the MAX7219 (labeled DIN in the datasheet)
+ * @param clockPin the number of the Arduino pin that is connected to the clock pin
+ *                 of the MAX7219 (labeled CLK in the datasheet)
+ * @param loadPin the number of the Arduino pin that is connected to the load pin
+ *                of the MAX7219 (labeled LOAD in the datasheet)
+ * @param digitCount the number of digits/rows connected to the chip. Make sure this number
+ *                   is correct. A number lower than 1 is treated as on, a number higher
+ *                   than 8 will be treated as 8.
+ */
+Max7219::Max7219(uint8_t dataPin, uint8_t clockPin, uint8_t loadPin, uint8_t digitCount)
+{
+    this->dataPin = dataPin;
+    this->clockPin = clockPin;
+    this->loadPin = loadPin;
+    this->digitCount = digitCount;
 
-// -------------------------------------------------------------------
-// Decode modes
-// -------------------------------------------------------------------
+    pinMode(this->dataPin, OUTPUT);
+    pinMode(this->clockPin, OUTPUT);
+    pinMode(this->loadPin, OUTPUT);
 
-// no code B decode 
-#define DECODE_CODEB_NONE 0
-// code b decode for digit 0, no decode for other digits
-#define DECODE_CODEB_0 1
-// code b decode for digits 0-3, no decode for other digits
-#define DECODE_CODEB_0_3 0x0F
-// code b decode for all digits
-#define DECODE_CODEB_0_7 0xFF
+    digitalWrite(loadPin, HIGH);
+
+    // enforce normal mode
+    testDisplay(false);
+
+    // shutdown code b decoding
+    writeRegister(REG_DECODE_MODE, DECODE_CODEB_NONE);
+
+    // we are scanning at least 4 digits by default due to the warnings in the IC datasheet
+    if (digitCount > 4)
+    {
+        writeRegister(REG_SCAN_LIMIT, digitCount - 1);
+    }
+    else
+    {
+        writeRegister(REG_SCAN_LIMIT, 3);
+    }
+
+    clearDisplay();
+
+    enable(false);
+}
 
 /**
- * Creates a new controller object for controlling the MAX7219.
- * Parameters needed are the three pins (data, clock, load) to which the
- * register is connected and the information how many digits (or rows, 
- * when using a LED matrix instead of seven segment display) are connected
- * to the IC. The minimum value is 1, the maximum value is 8. Any values
- * outside this range will be treatet as the edge of the range, i.e. -10
- * will be used as 1, 99 will be used as 8.
- * This method also initializes the IC by specifying full brightness, the
- * according scan limit.
- * PLEASE NOTE: This constructor does not enable the IC in order to give the
- * user more control over when the display will be activated. The user must
- * explicitly call enable(true) to activate the IC.
+ * Writes the given value to the register with the given address.
+ * Effectively, this result in shifting 16 bits of data to the IC.
+ *
+ * @param which the registers address (use defined values)
+ * @param value the value to write to the register. This value needs
+ *              to conform to the rules given in the ICs datasheet.
  */
-Max7219::Max7219(int dataPin, int clockPin, int loadPin, int digitCount)
+void Max7219::writeRegister(uint8_t which, uint8_t value)
 {
-  this->dataPin = dataPin;
-  this->clockPin = clockPin;
-  this->loadPin = loadPin;
-  this->digitCount = digitCount;
-  
-  pinMode(this->dataPin, OUTPUT);
-  pinMode(this->clockPin, OUTPUT);
-  pinMode(this->loadPin, OUTPUT);
-  
-  digitalWrite(loadPin, HIGH);
-  
-  // enforce normal mode
-  testDisplay(false);
-  
-  // shutdown code b decoding
-  writeRegister(REG_DECODE_MODE, DECODE_CODEB_NONE);
-  
-  // we are scanning at least 4 digits by default due to the warnings in the IC datasheet
-  if (digitCount > 4)
-  {
-    writeRegister(REG_SCAN_LIMIT, digitCount - 1);
-  }
-  else
-  {  
-    writeRegister(REG_SCAN_LIMIT, 3);
-  }
-  
-  clearDisplay();
-  
-  enable(false);
+    digitalWrite(loadPin, LOW);
+    delayMicroseconds(5);
+    shiftOut(this->dataPin, this->clockPin, MSBFIRST, which);
+    shiftOut(this->dataPin, this->clockPin, MSBFIRST, value);
+    delayMicroseconds(5);
+    digitalWrite(loadPin, HIGH);
 }
 
-void Max7219::writeRegister(int which, int value)
+/**
+ * Convenience method to write a boolean value to a register.
+ * A value of true renders as a 1, false renders as 0.
+ *
+ * @param which the registers address (use defined values)
+ * @param value the boolean value to set
+ */
+void Max7219::writeBoolRegister(uint8_t which, boolean value)
 {
-  digitalWrite(loadPin, LOW);
-  delayMicroseconds(5);
-  shiftOut(this->dataPin, this->clockPin, MSBFIRST, which);
-  shiftOut(this->dataPin, this->clockPin, MSBFIRST, value);
-  delayMicroseconds(5);
-  digitalWrite(loadPin, HIGH);
+    if (value)
+    {
+        writeRegister(which, 1);
+    }
+    else
+    {
+        writeRegister(which, 0);
+    }
 }
 
-void Max7219::writeBoolRegister(int which, boolean value)
-{
-  if (value)
-  {
-    writeRegister(which, 1);
-  }
-  else
-  {
-    writeRegister(which, 0);
-  }
-}
-
+/**
+ * Enables or disables the IC. When the IC is disabled, the display will
+ * automatically be blanked by the IC but all the configuration data
+ * (including the digit configurations) will remain intact. You can make
+ * the whole display flash its current content by repeatedly disabling
+ * and enabling the chip.
+ *
+ * @param enable if true, the chip will be enabled, otherwise the chip
+ *               will be disabled
+ */
 void Max7219::enable(boolean enable)
 {
-  writeBoolRegister(REG_SHUTDOWN, enable);
+    writeBoolRegister(REG_SHUTDOWN, enable);
 }
 
 /**
@@ -112,49 +113,81 @@ void Max7219::enable(boolean enable)
  * The level must be specified as a numeric value between 0 and 15. Any value
  * above 15 will be treated as 15.
  */
-void Max7219::setIntensity(int level)
+void Max7219::setIntensity(uint8_t level)
 {
-  byte newLevel = 0;
-  if (level > 16)
-  {
-    newLevel = 15;
-  }
-  else if (level > 0)
-  {
-    newLevel = level - 1;
-  }
-  writeRegister(REG_INTENSITY, newLevel);
-}
-
-void Max7219::testDisplay(boolean testDisplay)
-{
-  writeBoolRegister(REG_DISPLAY_TEST, testDisplay);
+    byte newLevel = 0;
+    if (level > 16)
+    {
+        newLevel = 15;
+    }
+    else if (level > 0)
+    {
+        newLevel = level - 1;
+    }
+    writeRegister(REG_INTENSITY, newLevel);
 }
 
 /**
- * Sets the raw value of a digit. The given value is loaded directly to the register
- * for the given digit. The digit number must be between 0 and digitCount-1, so if 
- * you have defined 6 digits, they are adressed 0-5.
+ * Enables or disables the display test mode of the MAX7219. When in test mode,
+ * all digits/rows will be completly lit with the brightest setting. The test
+ * mode also ignores the set scan limit and thus always scans through all eight
+ * digits, even if they are not connected. Switching to test mode DOES NOT delete
+ * the previous configuration. So once test mode is disabled again, the IC will
+ * resume the previous operation.
+ *
+ * @param testDisplay true enables the test mode, false disables it
  */
-void Max7219::setDigitRaw(int which, int value)
+void Max7219::testDisplay(boolean testDisplay)
 {
-  if (which >= 0 && which < this->digitCount)
-  {
-    // register parameter is between 0 and 7, register address is simply +1
-    writeRegister(which + 1, value);  
-  }
+    writeBoolRegister(REG_DISPLAY_TEST, testDisplay);
 }
 
+/**
+ * Sets the register content of the designated digit/row to the specified value.
+ * Each of the eight bits in value represents a single segment/column of the
+ * digit/row. The least significant bit in the value is segment A, the most
+ * significant is segment DP (sometimes called H). Please note: this bit order
+ * actually differs from the order sent to the MAX7219. I chose to implement
+ * a translation between my format and theirs because mine is easier to process.
+ * Note: this method produces unreadable results when Code-B decoding is activated.
+ * The bit translation table can be found in the header file of this library.
+ *
+ * @param which the index of the digit/row to configure. The value must be
+ *              between 0 and the value of digitCount (given in the constructor)
+ *              minus one.
+ * @param value the value to apply to that digit/row (see above for examples)
+ */
+void Max7219::setDigitRaw(uint8_t which, uint8_t value)
+{
+    if (which >= 0 && which < this->digitCount)
+    {
+        // register parameter is between 0 and 7, register address is simply +1
+        writeRegister(which + 1, value);
+    }
+}
+
+/**
+ * Clears the register of every digit, thereby blanking the display. This operation
+ * cannot be undone. If you want to shut off the display temporarily, consider using
+ * enable(false) instead.
+ */
 void Max7219::clearDisplay()
 {
-  for(int i = 1; i < 9; i++)
-  {
-    writeRegister(i, 0);
-  }
+    for(int i = 1; i < 9; i++)
+    {
+        writeRegister(i, 0);
+    }
 }
 
-int Max7219::version()
+/**
+ * This method returns a version indicator for this library. You can use it to
+ * check what version of this library is used, e.g. for issuing a warning when a
+ * non compatible version is used.
+ *
+ * @return the version number as an integer
+ */
+uint8_t Max7219::version()
 {
-  return 1;
+    return 1;
 }
 
