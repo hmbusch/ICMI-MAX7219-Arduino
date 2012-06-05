@@ -1,0 +1,6 @@
+obj
+cores
+libraries
+*.cbp
+*_build_log.html
+*.depend
