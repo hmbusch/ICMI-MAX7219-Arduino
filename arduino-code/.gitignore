@@ -4,3 +4,4 @@ libraries
 *.cbp
 *_build_log.html
 *.depend
+*.layout
