@@ -41,6 +41,9 @@ Max7219::Max7219(uint8_t dataPin, uint8_t clockPin, uint8_t loadPin, uint8_t dig
     // shutdown code b decoding
     writeRegister(REG_DECODE_MODE, DECODE_CODEB_NONE);
 
+    // switch to maximum brightness
+    setIntensity(16);
+
     // we are scanning at least 4 digits by default due to the warnings in the IC datasheet
     if (digitCount > 4)
     {
@@ -109,13 +112,24 @@ void Max7219::enable(boolean enable)
 }
 
 /**
- * Sets the display intensity to one of 16 levels, the higher the brighter.
- * The level must be specified as a numeric value between 0 and 15. Any value
- * above 15 will be treated as 15.
+ * Sets the overall brightness of the display. The MAX7219 supports 16 brightness
+ * levels, 1 being the darkest, 16 being the brightest. Please note that you
+ * can only set the overall brightness. Individual brightness control per digit
+ * is not supported by the IC. Also note that you cannot switch of the display
+ * by reducing the brightness to a minimum. The lowest brightness level still has
+ * a duty cycle of 1/32. To turn the display off, use the enable() method.
+ *
+ * @param level the desired brightness level, must be between one and sixteen.
+ *              Values larger than 16 will be treated as 16, values smaller than
+ *              1 are treated as 1.
+ *
  */
 void Max7219::setIntensity(uint8_t level)
 {
-    byte newLevel = 0;
+    uint8_t newLevel = 0;
+
+    // The value actually written to the MAX7219 must be between
+    // 0 and 15, therefore some calculations are necessary.
     if (level > 16)
     {
         newLevel = 15;
@@ -161,9 +175,33 @@ void Max7219::setDigitRaw(uint8_t which, uint8_t value)
 {
     if (which >= 0 && which < this->digitCount)
     {
+        // Apply the bit translation to the value
+        uint8_t translatedValue = value;
+        bitWrite(translatedValue, 6, bitRead(value, 0));
+        bitWrite(translatedValue, 5, bitRead(value, 1));
+        bitWrite(translatedValue, 4, bitRead(value, 2));
+        bitWrite(translatedValue, 2, bitRead(value, 4));
+        bitWrite(translatedValue, 1, bitRead(value, 5));
+        bitWrite(translatedValue, 0, bitRead(value, 6));
         // register parameter is between 0 and 7, register address is simply +1
-        writeRegister(which + 1, value);
+        writeRegister(which + 1, translatedValue);
     }
+}
+
+/**
+ * This method is an alias for setDigitRaw(uint8_t, uint8_t) that has
+ * a less confusing name when working with a matrix instead of a seven
+ * segment display.
+ * For more documentation, please refer to setDigitRaw().
+ *
+ * @param which the index of the row to configure. The value must be
+ *              between 0 and the value of digitCount (given in the constructor)
+ *              minus one.
+ * @param value the value to apply to that row
+ */
+void Max7219::setRow(uint8_t which, uint8_t value)
+{
+    setDigitRaw(which, value);
 }
 
 /**
