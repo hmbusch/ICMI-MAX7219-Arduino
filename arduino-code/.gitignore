@@ -5,3 +5,4 @@ libraries
 *_build_log.html
 *.depend
 *.layout
+.objs
