@@ -134,6 +134,19 @@ public:
     void setDigitRaw(uint8_t which, uint8_t value);
 
     /**
+     * This method is an alias for setDigitRaw(uint8_t, uint8_t) that has
+     * a less confusing name when working with a matrix instead of a seven
+     * segment display.
+     * For more documentation, please refer to setDigitRaw().
+     *
+     * @param which the index of the row to configure. The value must be
+     *              between 0 and the value of digitCount (given in the constructor)
+     *              minus one.
+     * @param value the value to apply to that row
+     */
+    void setRow(uint8_t which, uint8_t value);
+
+    /**
      * Sets the overall brightness of the display. The MAX7219 supports 16 brightness
      * levels, 1 being the darkest, 16 being the brightest. Please note that you
      * can only set the overall brightness. Individual brightness control per digit
@@ -141,9 +154,9 @@ public:
      * by reducing the brightness to a minimum. The lowest brightness level still has
      * a duty cycle of 1/32. To turn the display off, use the enable() method.
      *
-     * @param level the desired brightness level, must be between one and sixteen,
-     *              any other will be ignored.
-     *
+     * @param level the desired brightness level, must be between one and sixteen.
+     *              Values larger than 16 will be treated as 16, values smaller than
+     *              1 are treated as 1.
      */
     void setIntensity(uint8_t level);
 
