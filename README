@@ -12,4 +12,12 @@ Abstract
 This piece of software is my personal take on an Arduino library
 for controlling the Maxim MAX7219 LED controller IC.
 
+Further infos
+-------------
+You can view the documentation for the library at 
+http://www.icanmakeit.de/category/make/projects/icmi-max7219-arduino-lib/
+
+You can watch a video showing the BasicFunctionDemo sketch in action at
+http://www.youtube.com/watch?v=RK2xP-nQUcU
+
 
