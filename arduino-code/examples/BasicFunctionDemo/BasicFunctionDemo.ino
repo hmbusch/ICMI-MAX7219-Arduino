@@ -1,4 +1,4 @@
-#include "Max7219.h"
+#include "ICMIMax7219.h"
 
 /**
  * The number of the Arduino pin that is connected to the data in pin.
@@ -27,7 +27,7 @@ const uint8_t ROW_COUNT = 8;
  * This is the MAX7219 control instance that this sketch will use
  * to communicate with the LED driver.
  */
-Max7219 max7219(PIN_DATA, PIN_CLOCK, PIN_LOAD, ROW_COUNT);
+ICMIMax7219 max7219(PIN_DATA, PIN_CLOCK, PIN_LOAD, ROW_COUNT);
 
 /**
  * No setup required.

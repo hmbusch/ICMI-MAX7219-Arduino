@@ -14,8 +14,8 @@
 
 // Pre-processor directive to ensure that this header file is only
 // included once, no matter how often it is used in an include statement.
-#ifndef Max7219_h
-#define Max7219_h
+#ifndef ICMI_Max7219_h
+#define ICMI_Max7219_h
 
 // In order to use the well known Arduino commands, we need to include
 // the main Arduino header file. This will only work with Arduino 1.0
@@ -61,7 +61,7 @@
  * often read the term digit. When controlling a LED matrix, digit is the
  * same as row.
  */
-class Max7219
+class ICMIMax7219
 {
 public:
 
@@ -86,7 +86,7 @@ public:
      *                   is correct. A number lower than 1 is treated as on, a number higher
      *                   than 8 will be treated as 8.
      */
-    Max7219(uint8_t dataPin, uint8_t clockPin, uint8_t loadPin, uint8_t digitCount);
+    ICMIMax7219(uint8_t dataPin, uint8_t clockPin, uint8_t loadPin, uint8_t digitCount);
 
     /**
      * Enables or disables the IC. When the IC is disabled, the display will

@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "Max7219.h"
+#include "ICMIMax7219.h"
 
 /**
  * Creates a new controller instance. You need to pass the pin configuration
@@ -22,7 +22,7 @@
  *                   is correct. A number lower than 1 is treated as on, a number higher
  *                   than 8 will be treated as 8.
  */
-Max7219::Max7219(uint8_t dataPin, uint8_t clockPin, uint8_t loadPin, uint8_t digitCount)
+ICMIMax7219::ICMIMax7219(uint8_t dataPin, uint8_t clockPin, uint8_t loadPin, uint8_t digitCount)
 {
     this->dataPin = dataPin;
     this->clockPin = clockPin;
@@ -67,7 +67,7 @@ Max7219::Max7219(uint8_t dataPin, uint8_t clockPin, uint8_t loadPin, uint8_t dig
  * @param value the value to write to the register. This value needs
  *              to conform to the rules given in the ICs datasheet.
  */
-void Max7219::writeRegister(uint8_t which, uint8_t value)
+void ICMIMax7219::writeRegister(uint8_t which, uint8_t value)
 {
     digitalWrite(loadPin, LOW);
     delayMicroseconds(5);
@@ -84,7 +84,7 @@ void Max7219::writeRegister(uint8_t which, uint8_t value)
  * @param which the registers address (use defined values)
  * @param value the boolean value to set
  */
-void Max7219::writeBoolRegister(uint8_t which, boolean value)
+void ICMIMax7219::writeBoolRegister(uint8_t which, boolean value)
 {
     if (value)
     {
@@ -106,7 +106,7 @@ void Max7219::writeBoolRegister(uint8_t which, boolean value)
  * @param enable if true, the chip will be enabled, otherwise the chip
  *               will be disabled
  */
-void Max7219::enable(boolean enable)
+void ICMIMax7219::enable(boolean enable)
 {
     writeBoolRegister(REG_SHUTDOWN, enable);
 }
@@ -124,7 +124,7 @@ void Max7219::enable(boolean enable)
  *              1 are treated as 1.
  *
  */
-void Max7219::setIntensity(uint8_t level)
+void ICMIMax7219::setIntensity(uint8_t level)
 {
     uint8_t newLevel = 0;
 
@@ -151,7 +151,7 @@ void Max7219::setIntensity(uint8_t level)
  *
  * @param testDisplay true enables the test mode, false disables it
  */
-void Max7219::testDisplay(boolean testDisplay)
+void ICMIMax7219::testDisplay(boolean testDisplay)
 {
     writeBoolRegister(REG_DISPLAY_TEST, testDisplay);
 }
@@ -171,7 +171,7 @@ void Max7219::testDisplay(boolean testDisplay)
  *              minus one.
  * @param value the value to apply to that digit/row (see above for examples)
  */
-void Max7219::setDigitRaw(uint8_t which, uint8_t value)
+void ICMIMax7219::setDigitRaw(uint8_t which, uint8_t value)
 {
     if (which >= 0 && which < this->digitCount)
     {
@@ -199,7 +199,7 @@ void Max7219::setDigitRaw(uint8_t which, uint8_t value)
  *              minus one.
  * @param value the value to apply to that row
  */
-void Max7219::setRow(uint8_t which, uint8_t value)
+void ICMIMax7219::setRow(uint8_t which, uint8_t value)
 {
     setDigitRaw(which, value);
 }
@@ -209,7 +209,7 @@ void Max7219::setRow(uint8_t which, uint8_t value)
  * cannot be undone. If you want to shut off the display temporarily, consider using
  * enable(false) instead.
  */
-void Max7219::clearDisplay()
+void ICMIMax7219::clearDisplay()
 {
     for(int i = 1; i < 9; i++)
     {
@@ -224,8 +224,8 @@ void Max7219::clearDisplay()
  *
  * @return the version number as an integer
  */
-uint8_t Max7219::version()
+uint8_t ICMIMax7219::version()
 {
-    return 1;
+    return 2;
 }
 
