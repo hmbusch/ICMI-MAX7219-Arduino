@@ -77,11 +77,11 @@ public:
      * until enable(true) is called.
      *
      * @param dataPin the number of the Arduino pin that is connected to the data in pin
-     *                of the MAX7219 (labeled DIN in the datasheet)
+     *                of the MAX7219 (pin 1, labeled DIN in the datasheet)
      * @param clockPin the number of the Arduino pin that is connected to the clock pin
-     *                 of the MAX7219 (labeled CLK in the datasheet)
+     *                 of the MAX7219 (pin 13, labeled CLK in the datasheet)
      * @param loadPin the number of the Arduino pin that is connected to the load pin
-     *                of the MAX7219 (labeled LOAD in the datasheet)
+     *                of the MAX7219 (pin 12, labeled LOAD in the datasheet)
      * @param digitCount the number of digits/rows connected to the chip. Make sure this number
      *                   is correct. A number lower than 1 is treated as on, a number higher
      *                   than 8 will be treated as 8.

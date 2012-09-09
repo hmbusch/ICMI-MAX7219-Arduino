@@ -1,17 +1,20 @@
 #include "Max7219.h"
 
 /**
- * the number of the Arduino pin that is connected to the data in pin
+ * The number of the Arduino pin that is connected to the data in pin.
+ * The data in pin is pin 1 on the MAX7219.
  */
 const uint8_t PIN_DATA = 5;
 
 /**
- * the number of the Arduino pin that is connected to the clock pin
+ * The number of the Arduino pin that is connected to the clock pin.
+ * The clock pin is pin 13 on the MAX7219.
  */
 const uint8_t PIN_CLOCK = 6;
 
 /**
- * the number of the Arduino pin that is connected to the load pin
+ * The number of the Arduino pin that is connected to the load pin
+ * The data in pin is pin 12 on the MAX7219.
  */
 const uint8_t PIN_LOAD = 7;
 
