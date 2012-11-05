@@ -23,17 +23,18 @@ const uint8_t PIN_LOAD = 7;
  */
 const uint8_t ROW_COUNT = 8;
 
+
 /**
- * This is the MAX7219 control instance that this sketch will use
- * to communicate with the LED driver.
+ * Initialize a variable for controlling the MAX7219.
  */
-ICMIMax7219 max7219(PIN_DATA, PIN_CLOCK, PIN_LOAD, ROW_COUNT);
+ICMIMax7219 max7219;
 
 /**
  * No setup required.
  */
 void setup()
 {
+    max7219.begin(PIN_DATA, PIN_CLOCK, PIN_LOAD, ROW_COUNT);
 }
 
 void loop()

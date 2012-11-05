@@ -66,14 +66,13 @@ class ICMIMax7219
 public:
 
     /**
-     * Creates a new controller instance. You need to pass the pin configuration
-     * to the constructor (data in, clock, load) and specify how many digits/rows
-     * you have connected to the MAX7219. This number is used to set the scan limit
-     * of the IC. If you connect less than 8 digits, it makes sense not to scan
-     * through all 8 possible digits for better brightness. In addition, this
-     * number is used to validate the digit number when calling any digit manipulation
-     * method.
-     * The constructor does not enable the chip, so it will not display anything
+     * Initializes the instance with the values given. If the instance was created
+     * using the empty constructor, you *must* call this method before calling any
+     * other method.
+     * If the instance was created using the constructor with parameters, this method
+     * will be called for you by the constructor.
+     *
+     * This method does not enable the chip, so it will not display anything
      * until enable(true) is called.
      *
      * @param dataPin the number of the Arduino pin that is connected to the data in pin
@@ -86,7 +85,7 @@ public:
      *                   is correct. A number lower than 1 is treated as on, a number higher
      *                   than 8 will be treated as 8.
      */
-    ICMIMax7219(uint8_t dataPin, uint8_t clockPin, uint8_t loadPin, uint8_t digitCount);
+    void begin(uint8_t dataPin, uint8_t clockPin, uint8_t loadPin, uint8_t digitCount);
 
     /**
      * Enables or disables the IC. When the IC is disabled, the display will
