@@ -1,17 +1,20 @@
-#include "Max7219.h"
+#include "ICMIMax7219.h"
 
 /**
- * the number of the Arduino pin that is connected to the data in pin
+ * The number of the Arduino pin that is connected to the data in pin.
+ * The data in pin is pin 1 on the MAX7219.
  */
 const uint8_t PIN_DATA = 5;
 
 /**
- * the number of the Arduino pin that is connected to the clock pin
+ * The number of the Arduino pin that is connected to the clock pin.
+ * The clock pin is pin 13 on the MAX7219.
  */
 const uint8_t PIN_CLOCK = 6;
 
 /**
- * the number of the Arduino pin that is connected to the load pin
+ * The number of the Arduino pin that is connected to the load pin
+ * The data in pin is pin 12 on the MAX7219.
  */
 const uint8_t PIN_LOAD = 7;
 
@@ -20,17 +23,18 @@ const uint8_t PIN_LOAD = 7;
  */
 const uint8_t ROW_COUNT = 8;
 
+
 /**
- * This is the MAX7219 control instance that this sketch will use
- * to communicate with the LED driver.
+ * Initialize a variable for controlling the MAX7219.
  */
-Max7219 max7219(PIN_DATA, PIN_CLOCK, PIN_LOAD, ROW_COUNT);
+ICMIMax7219 max7219;
 
 /**
  * No setup required.
  */
 void setup()
 {
+    max7219.begin(PIN_DATA, PIN_CLOCK, PIN_LOAD, ROW_COUNT);
 }
 
 void loop()
